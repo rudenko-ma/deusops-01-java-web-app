@@ -1,12 +1,15 @@
 # syntax=docker/dockerfile:1
 
-FROM node:14-alpine
-ENV NODE_ENV development
-WORKDIR /app
+FROM node:14-alpine AS builder
+ENV NODE_ENV production
+WORKDIR /build
 
 COPY package.json .
 RUN npm install
 
 COPY . .
-EXPOSE 3000
-CMD [ "npm", "run", "start" ]
+RUN npm run-script build
+
+
+FROM nginx:1.21.0-alpine
+COPY --from=builder /build/build /usr/share/nginx/html
