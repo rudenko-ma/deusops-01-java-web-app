@@ -1,5 +1,12 @@
 version: '3.3'
 
+volumes:
+  mysql:
+
+networks:
+  net: 
+    driver: bridge
+
 services:
 
   nginx:
@@ -13,6 +20,8 @@ services:
     depends_on:
       - frontend
       - backend
+    networks:
+      - net
 
   frontend:
     image: 01-java-web-app-frontend:${FRONTEND_IMAGE_TAG}
@@ -20,6 +29,8 @@ services:
     restart: always
     depends_on:
       - backend
+    networks:
+      - net
 
   backend:
     image: 01-java-web-app-backend:${BACKEND_IMAGE_TAG}
@@ -31,6 +42,8 @@ services:
       SPRING_DATASOURCE_PASSWORD: '${BACKEND_DB_PASS}'
     depends_on:
       - db
+    networks:
+      - net
   
   db:
     image: mysql:${MYSQL_IMAGE_TAG}
@@ -41,4 +54,6 @@ services:
       MYSQL_PASSWORD: '${BACKEND_DB_PASS}'
       MYSQL_ROOT_PASSWORD: '${BACKEND_DB_PASS}'
     volumes:
-      - ${PWD}/mysql:/var/lib/mysql
+      - mysql:/var/lib/mysql
+    networks:
+      - net
