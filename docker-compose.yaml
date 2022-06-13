@@ -2,12 +2,22 @@ version: '3.3'
 
 services:
 
+  nginx:
+    image: nginx:${NGINX_IMAGE_TAG}
+    restart: always
+    ports:
+      - '80:80'
+      - '8080:8080'
+    volumes:
+      - ${PWD}/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - frontend
+      - backend
+
   frontend:
     image: 01-java-web-app-frontend:${FRONTEND_IMAGE_TAG}
     build: ./frontend/
     restart: always
-    ports:
-      - '3000:3000'
     depends_on:
       - backend
 
@@ -15,8 +25,6 @@ services:
     image: 01-java-web-app-backend:${BACKEND_IMAGE_TAG}
     build: ./backend/
     restart: always
-    ports:
-      - '8080:8080'
     environment:
       SPRING_DATASOURCE_URL: 'jdbc:mysql://${BACKEND_DB_HOST}:3306/${BACKEND_DB_NAME}'
       SPRING_DATASOURCE_USERNAME: '${BACKEND_DB_USER}'
@@ -33,4 +41,4 @@ services:
       MYSQL_PASSWORD: '${BACKEND_DB_PASS}'
       MYSQL_ROOT_PASSWORD: '${BACKEND_DB_PASS}'
     volumes:
-      - ./mysql:/var/lib/mysql
+      - ${PWD}/mysql:/var/lib/mysql
