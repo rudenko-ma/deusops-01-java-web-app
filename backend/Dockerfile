@@ -1,11 +1,12 @@
 # syntax=docker/dockerfile:1
 
-FROM openjdk:13-jdk-alpine
+FROM maven:3-eclipse-temurin-11-alpine as builder
+WORKDIR /build
+COPY . .
+RUN mvn clean package -DskipTests=true 
+
+FROM bellsoft/liberica-openjdk-alpine:11
 WORKDIR /app
-
-COPY .mvn/ .mvn
-COPY mvnw pom.xml ./
-RUN chmod +x ./mvnw && ./mvnw dependency:go-offline
-
-COPY src ./src
-CMD ["./mvnw", "spring-boot:run"]
+COPY --from=builder /build/target/studentsystem-*.jar /app/app.jar
+EXPOSE 8080
+CMD ["java", "-jar", "/app/app.jar"]
